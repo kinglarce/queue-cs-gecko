@@ -1,6 +1,4 @@
-# Queue CS Gecko System
-
-![Queue CS Gecko System Logo](https://via.placeholder.com/200x200?text=CS+Gecko)
+# Queue CS Gecko System 🦎
 
 A modern, digital queue management system designed to streamline customer service operations, reduce perceived wait times, and improve overall customer experience.
 
