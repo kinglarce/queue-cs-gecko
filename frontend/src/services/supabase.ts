@@ -1,24 +1,7 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { ApiResponse, Queue, Ticket, QueueStatus, TicketStatus } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
-
-// Initialize Supabase client
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'http://localhost:8000';
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
-
-// Create client with proper configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true
-  },
-  global: {
-    headers: {
-      'apikey': supabaseAnonKey,
-      'Content-Type': 'application/json',
-    },
-  },
-});
+import { supabase } from '../App';
 
 // Error handling helper
 const handleApiError = (error: any): string => {
@@ -40,34 +23,96 @@ export const QueueService = {
       // Generate UUIDs for id and admin_secret
       const queueId = uuidv4();
       const adminSecret = uuidv4();
+
+      console.log('Creating queue with:', { queueId, name, adminSecret });
       
-      // Create a queue record
-      const { data, error } = await supabase
-        .from('queues')
-        .insert([
-          {
-            id: queueId,
-            name,
-            admin_secret: adminSecret,
-            created_at: new Date().toISOString(),
-            status: 'active'
-          }
-        ])
-        .select();
+      // Access URLs directly from environment instead of trying to access protected properties
+      const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'http://localhost:8000';
+      const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
       
-      if (error) {
-        console.error('Error creating queue:', error);
-        return { data: null, error: error.message };
-      }
+      // Create a direct manual POST request to diagnose the issue
+      console.log('Making direct REST API call to', `${supabaseUrl}/rest/v1/queues`);
       
-      return {
-        data: {
-          queueId,
-          adminSecret
-        },
-        error: null
+      // Create the queue data object
+      const queueData = {
+        id: queueId,
+        name,
+        admin_secret: adminSecret,
+        created_at: new Date().toISOString(),
+        status: 'active'
       };
+      
+      console.log('Queue data:', queueData);
+      console.log('Headers:', {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      });
+      
+      try {
+        // Direct fetch to diagnose issues
+        const directResponse = await fetch(`${supabaseUrl}/rest/v1/queues`, {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(queueData)
+        });
+        
+        console.log('Direct REST API response status:', directResponse.status, directResponse.statusText);
+        
+        // Try to get more information about the error
+        let responseText = '';
+        try {
+          responseText = await directResponse.text();
+          console.log('Response text:', responseText);
+        } catch (textError) {
+          console.error('Error getting response text:', textError);
+        }
+        
+        if (!directResponse.ok) {
+          return { 
+            data: null, 
+            error: `API Error (${directResponse.status}): ${responseText || directResponse.statusText}`
+          };
+        }
+        
+        return {
+          data: {
+            queueId,
+            adminSecret
+          },
+          error: null
+        };
+      } catch (fetchError) {
+        console.error('Fetch error:', fetchError);
+        
+        // Fallback to Supabase client if direct fetch fails
+        console.log('Falling back to Supabase client');
+        const { data, error } = await supabase
+          .from('queues')
+          .insert([queueData])
+          .select();
+        
+        if (error) {
+          console.error('Error creating queue with Supabase client:', error);
+          return { data: null, error: `Supabase client error: ${error.message}` };
+        }
+        
+        return {
+          data: {
+            queueId,
+            adminSecret
+          },
+          error: null
+        };
+      }
     } catch (error) {
+      console.error('Queue creation error:', error);
       return { data: null, error: handleApiError(error) };
     }
   },

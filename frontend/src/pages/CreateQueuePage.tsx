@@ -4,14 +4,19 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import useQueueStore from '../store/queueStore';
 
-function CreateQueuePage() {
-  const [queueName, setQueueName] = useState('');
-  const [error, setError] = useState('');
+interface CreateQueueResult {
+  queueId: string;
+  adminSecret: string;
+}
+
+const CreateQueuePage: React.FC = () => {
+  const [queueName, setQueueName] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const navigate = useNavigate();
   
   const { createQueue, isLoading } = useQueueStore();
   
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     
@@ -22,6 +27,17 @@ function CreateQueuePage() {
     
     try {
       console.log('Attempting to create queue:', queueName);
+      
+      // Debug: Log direct access to confirm Supabase is working
+      const response = await fetch('http://localhost:8000/rest/v1/queues', {
+        method: 'GET',
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+        }
+      });
+      console.log('Direct Supabase test response:', response.status, response.statusText);
+      
       const result = await createQueue(queueName);
       
       console.log('Create queue result:', result);
@@ -36,7 +52,7 @@ function CreateQueuePage() {
         console.error('Failed to create queue:', result);
         setError('Failed to create queue. Please check your network connection and try again.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error creating queue:', err);
       setError(err?.message || 'An unexpected error occurred. Please try again later.');
     }
@@ -101,6 +117,6 @@ function CreateQueuePage() {
       <Footer />
     </div>
   );
-}
+};
 
 export default CreateQueuePage; 

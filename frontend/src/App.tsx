@@ -12,7 +12,7 @@ import QRPosterPage from './pages/QRPosterPage';
 import ExampleFormPage from './pages/ExampleFormPage';
 
 // Supabase Client
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'http://localhost:8000';
@@ -23,7 +23,7 @@ console.log('Supabase URL:', supabaseUrl);
 console.log('Supabase Key (first 10 chars):', supabaseAnonKey.substring(0, 10) + '...');
 
 // Create Supabase client with comprehensive headers
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true
@@ -39,7 +39,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-function App() {
+const App: React.FC = () => {
   return (
     <Router>
       <div className="App min-h-screen bg-gray-50">
@@ -56,6 +56,6 @@ function App() {
       </div>
     </Router>
   );
-}
+};
 
 export default App; 

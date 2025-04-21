@@ -55,15 +55,26 @@ const useQueueStore = create<QueueState>((set, get) => ({
   createQueue: async (name) => {
     set({ isLoading: true, error: null });
     
-    const { data, error } = await QueueService.createQueue(name);
-    
-    if (error) {
-      set({ error, isLoading: false });
+    try {
+      const { data, error } = await QueueService.createQueue(name);
+      
+      if (error) {
+        set({ error, isLoading: false });
+        return null;
+      }
+      
+      if (!data) {
+        set({ error: 'Failed to create queue - no data returned', isLoading: false });
+        return null;
+      }
+      
+      set({ isLoading: false });
+      return data;
+    } catch (err: any) {
+      const errorMessage = err?.message || 'An unexpected error occurred';
+      set({ error: errorMessage, isLoading: false });
       return null;
     }
-    
-    set({ isLoading: false });
-    return data;
   },
   
   // Load a queue by ID
