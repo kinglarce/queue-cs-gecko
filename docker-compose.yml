@@ -1,0 +1,57 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: cs-gecko-queue-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules   # This ensures node_modules in the container is not overwritten
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_SUPABASE_URL=${SUPABASE_URL}
+      - REACT_APP_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - CHOKIDAR_USEPOLLING=true  # This helps with file watching in Docker
+      - WDS_SOCKET_PORT=0         # This helps WebpackDevServer run correctly in Docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - supabase
+    restart: unless-stopped
+
+  supabase:
+    image: supabase/supabase-dev
+    ports:
+      - "8000:8000"   # REST API
+      - "5432:5432"   # PostgreSQL
+      - "9000:9000"   # Management API
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      STUDIO_PORT: 9000
+    volumes:
+      - ./supabase/data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  # Nginx service for reverse proxy (optional but recommended for production)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - frontend
+      - supabase
+    restart: unless-stopped 
