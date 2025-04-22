@@ -5,7 +5,7 @@ echo.
 REM Check if .env file already exists
 if exist .env (
   echo Warning: .env file already exists.
-  set /p overwrite=Do you want to overwrite it? (y/n): 
+  set /p overwrite="Do you want to overwrite it? (y/n): "
   if /i NOT "%overwrite%"=="y" (
     echo Keeping existing .env file.
     goto :EOF
@@ -40,8 +40,10 @@ echo 1. Start your application with: docker-compose up -d
 echo 2. If you need to regenerate tokens later, run: npm run generate-jwt
 echo.
 echo Would you like to open the .env file now?
-set /p open_env=Open .env file? (y/n):
+set /p open_env="Open .env file? (y/n): "
 
 if /i "%open_env%"=="y" (
   start notepad .env
-) 
+)
+
+pause 

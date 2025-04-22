@@ -12,16 +12,21 @@ echo -e "${YELLOW}=== Fixing Queue CS Gecko System Dependency Issues ===${NC}"
 if command -v docker &> /dev/null && docker ps &> /dev/null; then
   echo -e "${YELLOW}Docker detected. Checking for running frontend container...${NC}"
   
-  # Get the frontend container ID
-  CONTAINER_ID=$(docker ps | grep cs-gecko-queue-frontend | awk '{print $1}')
+  # Show all running containers
+  echo -e "${YELLOW}Current running containers:${NC}"
+  docker ps
+  echo ""
+  
+  # Ask user to input the container ID
+  echo -e "${YELLOW}Enter the frontend container ID from above:${NC}"
+  read CONTAINER_ID
   
   if [ -z "$CONTAINER_ID" ]; then
-    echo -e "${RED}Frontend container not found. Is it running?${NC}"
-    echo "Try running: docker-compose up -d"
+    echo -e "${RED}No container ID provided. Exiting.${NC}"
     exit 1
   fi
   
-  echo -e "${GREEN}Frontend container found: $CONTAINER_ID${NC}"
+  echo -e "${GREEN}Using container: $CONTAINER_ID${NC}"
   
   # Create the scripts directory if it doesn't exist
   echo -e "${YELLOW}Setting up dependency fix script...${NC}"

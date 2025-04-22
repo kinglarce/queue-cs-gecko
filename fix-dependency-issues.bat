@@ -7,16 +7,20 @@ docker ps >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
   echo Docker detected. Checking for running frontend container...
   
-  REM Get the frontend container ID
-  for /f "tokens=1" %%i in ('docker ps ^| findstr "cs-gecko-queue-frontend"') do set CONTAINER_ID=%%i
+  REM List containers for user to see
+  echo Current running containers:
+  docker ps
+  echo.
+  
+  REM Ask user to input the container ID instead of auto-detecting
+  set /p CONTAINER_ID="Enter the frontend container ID from above: "
   
   if "%CONTAINER_ID%"=="" (
-    echo Frontend container not found. Is it running?
-    echo Try running: docker-compose up -d
+    echo No container ID provided. Exiting.
     exit /b 1
   )
   
-  echo Frontend container found: %CONTAINER_ID%
+  echo Using container: %CONTAINER_ID%
   
   REM Create the scripts directory in the container
   echo Setting up dependency fix script...
