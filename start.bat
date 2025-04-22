@@ -42,7 +42,7 @@ echo - Frontend: http://localhost:3000
 curl -s -o nul -w "Frontend: %%{http_code}\n" http://localhost:3000
 
 echo - Supabase API: http://localhost:8000/rest/v1/
-curl -s -o nul -w "Supabase API: %%{http_code}\n" http://localhost:8000/rest/v1/ -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+curl -s -o nul -w "Supabase API: %%{http_code}\n" http://localhost:8000/rest/v1/ -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRldi1hbm9uLWtleSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjE0MjEyMzYyLCJleHAiOjE5Mjk3ODgzNjJ9.zqdHRKBYGjJTUf6_H-qBXwMj_stP4aMhzGYYRLsKEQE"
 
 echo - Supabase Studio: http://localhost:9000
 curl -s -o nul -w "Supabase Studio: %%{http_code}\n" http://localhost:9000/

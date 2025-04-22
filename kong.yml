@@ -1,1 +1,47 @@
- 
+_format_version: "2.1"
+_transform: true
+
+services:
+  - name: auth-v1
+    url: http://auth:9999/verify
+    routes:
+      - name: auth-v1-route
+        paths:
+          - /auth/v1/verify
+    plugins:
+      - name: cors
+  - name: auth-v1-token
+    url: http://auth:9999/token
+    routes:
+      - name: auth-v1-token-route
+        paths:
+          - /auth/v1/token
+    plugins:
+      - name: cors
+  - name: rest
+    url: http://rest:3000
+    routes:
+      - name: rest-route
+        paths:
+          - /rest/v1
+    plugins:
+      - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: true
+  - name: realtime
+    url: http://realtime:4000/socket
+    routes:
+      - name: realtime-route
+        paths:
+          - /realtime/v1
+    plugins:
+      - name: cors
+
+consumers:
+  - username: anon
+    keyauth_credentials:
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRldi1hbm9uLWtleSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjE0MjEyMzYyLCJleHAiOjE5Mjk3ODgzNjJ9.zqdHRKBYGjJTUf6_H-qBXwMj_stP4aMhzGYYRLsKEQE
+  - username: service_role
+    keyauth_credentials:
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRldi1zZXJ2aWNlLWtleSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE2MTQyMTIzNjIsImV4cCI6MTkyOTc4ODM2Mn0.kP4HCRqbf_OL9rDwWtTnWjLe-BWrYnTm4B9-CpZQ-4E 

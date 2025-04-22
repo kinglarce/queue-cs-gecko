@@ -2,15 +2,21 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY external-deps.json ./
+# Install create-react-app if starting fresh
+RUN npm install -g create-react-app
 
-# Install dependencies with legacy-peer-deps flag to resolve TypeScript version conflict
-RUN npm install --legacy-peer-deps
+# Copy package.json and install dependencies
+COPY package.json package-lock.json* ./
+RUN npm install || echo "No package.json found, will initialize later"
 
-# Install external dependencies from separate file
-RUN npm install --legacy-peer-deps $(node -e "console.log(Object.entries(require('./external-deps.json').dependencies).map(([pkg, ver]) => pkg + '@' + ver.replace(/^\^/, '')).join(' '))")
+# Start command if node_modules doesn't exist
+CMD if [ ! -d "node_modules" ]; then \
+      echo "No node_modules found, initializing React app..."; \
+      npx create-react-app . --template typescript; \
+      npm install; \
+      npx tailwindcss init; \
+    fi && \
+    npm start
 
 # Copy the rest of the application
 COPY . .
@@ -39,9 +45,6 @@ ENV REACT_APP_DEFAULT_WAIT_TIME_PER_PERSON=${REACT_APP_DEFAULT_WAIT_TIME_PER_PER
 
 # Give TypeScript time to recognize the newly installed modules
 RUN touch src/App.tsx
-
-# Build the app (for production)
-# RUN npm run build
 
 # For development
 EXPOSE 3000
