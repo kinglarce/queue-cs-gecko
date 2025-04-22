@@ -1,222 +1,217 @@
 # Queue CS Gecko System 🦎
 
-A modern, digital queue management system designed to streamline customer service operations, reduce perceived wait times, and improve overall customer experience.
+A modern digital queue management system designed to streamline customer service operations. This application allows organizations to create digital queues, manage customer flow, and provide real-time updates to visitors.
 
 ## 🚀 Features
 
-- **Virtual Queue Management**: Eliminate physical lines with a digital waiting system
-- **Real-time Updates**: Customers receive live updates about their position in queue
-- **QR-Code Integration**: Easy queue joining through scannable QR codes
+- **Digital Queue Management**: Create and manage multiple queues
+- **Real-time Updates**: Customers receive instant updates about their position
+- **QR Code Integration**: Easy queue joining via QR code scanning
 - **Admin Dashboard**: Manage queues, call next customers, and view statistics
-- **Wait Time Estimation**: Automatically calculate and display estimated wait times
-- **Form Components**: Modular, reusable form components built with React Hook Form and Zod
-- **Mobile Responsive**: Optimized for both desktop and mobile experiences
+- **Estimated Wait Times**: Automatically calculate and display wait times
+- **Responsive Design**: Works on all devices, from mobile to large displays
 
-## 📋 Table of Contents
+## 🛠️ Technology Stack
 
-- [Technologies](#-technologies)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-- [Usage](#-usage)
-  - [Customer Flow](#customer-flow)
-  - [Admin Flow](#admin-flow)
-  - [Form System](#form-system)
-- [Docker](#-docker)
-- [Database Schema](#-database-schema)
-- [Contributing](#-contributing)
-- [License](#-license)
+- **Frontend**: React, TypeScript, Tailwind CSS
+- **State Management**: React Hooks, Context API
+- **Backend Options**:
+  - **Production**: Supabase (PostgreSQL + APIs)
+  - **Development**: JSON Server (mock API)
+- **Deployment**:
+  - **Frontend**: Vercel
+  - **Backend**: Supabase Cloud
 
-## 🛠 Technologies
-
-- **Frontend**:
-  - React 18 with TypeScript
-  - React Router for navigation
-  - React Hook Form for form management
-  - Zod for validation
-  - TailwindCSS for styling
-  - Zustand for state management
-
-- **Backend**:
-  - Supabase for database and authentication
-  - PostgreSQL for data storage
-  - Row-Level Security for data protection
-
-- **Infrastructure**:
-  - Docker for containerization
-  - Nginx for reverse proxy
-
-## 🏁 Getting Started
+## 🔧 Development Setup
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or later)
-- [Docker](https://www.docker.com/) and Docker Compose
-- [Git](https://git-scm.com/)
+- [Docker](https://www.docker.com/get-started) and Docker Compose
+- Node.js (v16+) and npm/yarn (for local development without Docker)
 
-### Installation
+### Quick Start with Docker (Recommended)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/queue-cs-gecko.git
-   cd queue-cs-gecko
-   ```
+The simplest way to get everything running:
 
-2. Copy the environment variables:
-   ```bash
-   cp .env.example .env
-   ```
+#### On Windows:
 
-3. Start the Docker containers:
-   ```bash
-   docker-compose up --build
-   ```
-
-4. The application will be available at:
-   - Frontend: http://localhost:3000
-   - Supabase API: http://localhost:8000
-   - Supabase Studio: http://localhost:9000
-
-### Environment Variables
-
-Key environment variables that can be configured in `.env`:
-
-```
-# Supabase Configuration
-SUPABASE_URL=http://localhost:8000
-SUPABASE_ANON_KEY=<your-anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
-
-# React App Variables
-REACT_APP_SUPABASE_URL=http://localhost:8000
-REACT_APP_SUPABASE_ANON_KEY=<your-anon-key>
-
-# Feature Flags
-REACT_APP_ENABLE_NOTIFICATIONS=true
-REACT_APP_ENABLE_SMS_NOTIFICATIONS=false
-REACT_APP_ENABLE_DARK_MODE=true
-
-# Settings
-REACT_APP_DEFAULT_WAIT_TIME_PER_PERSON=3
-```
-
-## 🧑‍💻 Usage
-
-### Customer Flow
-
-1. **Join the Queue**:
-   - Scan the QR code at the establishment
-   - Fill in your details (name, email, phone)
-   - Receive a confirmation with your position in line
-
-2. **Wait Anywhere**:
-   - Track your position in the queue
-   - Receive updates as you move up in the queue
-   - Get notified when it's almost your turn
-
-3. **Service Time**:
-   - Receive a notification when it's your turn
-   - Proceed to the service point
-
-### Admin Flow
-
-1. **Create a Queue**:
-   - Set up a new queue with a name
-   - Receive admin credentials for management
-
-2. **Manage Queue**:
-   - View all customers in the queue
-   - Call the next customer
-   - Skip or reorder customers if needed
-   - Reset the queue at the end of the day
-
-3. **Display Options**:
-   - Set up a public display screen showing current status
-   - Print QR code posters for customers to scan
-
-### Form System
-
-The system includes a reusable form component library:
-
-- `Form`: The main container component
-- `FormField`: Connects to React Hook Form
-- `FormInput`: Pre-styled input elements
-- `FormSection`: Groups related fields
-- `FormActions`: Container for form buttons
-- `FormMessage`: Displays validation messages
-
-Example usage:
-
-```tsx
-<Form form={form} onSubmit={handleSubmit}>
-  <FormSection title="Personal Details">
-    <FormField name="name">
-      <Input label="Your Name" required />
-    </FormField>
-  </FormSection>
-  <FormActions>
-    <Button type="submit">Submit</Button>
-  </FormActions>
-</Form>
-```
-
-## 🐳 Docker
-
-The application is containerized using Docker with three main services:
-
-1. **Frontend**: React application
-2. **Supabase**: PostgreSQL database with Supabase API
-3. **Nginx**: Reverse proxy for routing
-
-To rebuild after changes:
 ```bash
-docker-compose down
-docker-compose build --no-cache
-docker-compose up
+# Run the startup script
+start.bat
 ```
 
-## 🗄️ Database Schema
+#### On macOS/Linux:
 
-The system uses two main tables:
+```bash
+# Make script executable
+chmod +x start.sh
 
-### Queues Table
-Stores information about different queues in the system.
+# Run the startup script
+./start.sh
+```
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| name | TEXT | Queue name |
-| admin_secret | TEXT | Secret key for admin access |
-| created_at | TIMESTAMPTZ | Creation timestamp |
-| updated_at | TIMESTAMPTZ | Last update timestamp |
-| status | TEXT | Queue status (active, paused, closed, archived) |
+This will:
+1. Start PostgreSQL database
+2. Start Supabase API
+3. Start the frontend application
+4. Configure nginx for routing
 
-### Tickets Table
-Represents customers waiting in queues.
+Then open http://localhost:3000 in your browser
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| queue_id | UUID | Foreign key to queues table |
-| name | TEXT | Customer name |
-| ticket_number | INTEGER | Position in queue |
-| status | TEXT | Ticket status (waiting, serving, served, skipped, archived) |
-| created_at | TIMESTAMPTZ | When customer joined |
-| updated_at | TIMESTAMPTZ | Last status update |
-| completed_at | TIMESTAMPTZ | When service completed |
+### Without Docker (Advanced)
+
+If you want to run components individually:
+
+1. Set up PostgreSQL and run the SQL scripts from `supabase/migrations/`
+
+2. Start a local Supabase instance or use a cloud Supabase instance
+
+3. Configure the frontend to connect to your Supabase instance:
+   ```bash
+   cd frontend
+   # Configure environment variables
+   cp ../.env.example .env.local
+   # Edit .env.local with your Supabase URL and anon key
+   
+   # Start frontend
+   npm install
+   npm start
+   ```
+
+## 🔍 Troubleshooting
+
+### Database Connection Errors
+
+If you see database connection errors in Supabase logs:
+
+1. Ensure PostgreSQL is running and healthy:
+   ```bash
+   docker-compose ps
+   ```
+
+2. Check PostgreSQL logs:
+   ```bash
+   docker-compose logs postgres
+   ```
+
+3. Verify the migrations were applied:
+   ```bash
+   docker-compose exec postgres psql -U postgres -c "SELECT * FROM pg_tables WHERE schemaname='public'"
+   ```
+
+4. Restart Supabase:
+   ```bash
+   docker-compose restart supabase
+   ```
+
+### Frontend Connection Issues
+
+If the frontend can't connect to Supabase:
+
+1. Check browser console for errors
+
+2. Verify nginx configuration:
+   ```bash
+   docker-compose exec nginx nginx -t
+   ```
+
+3. Check nginx logs:
+   ```bash
+   docker-compose logs nginx
+   ```
+
+4. Try directly accessing Supabase API:
+   ```
+   curl http://localhost:8000/rest/v1/
+   ```
+
+## 📊 Production Deployment
+
+### Setting up Supabase (Backend)
+
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+
+2. Run the SQL scripts from `supabase/migrations` to set up your database schema
+
+3. Enable Row-Level Security (RLS) and set up appropriate policies
+
+4. Note your Supabase URL and anon key for frontend deployment
+
+### Deploying to Vercel (Frontend)
+
+1. Fork or clone this repository to your GitHub account
+
+2. Sign up for [Vercel](https://vercel.com) and create a new project
+
+3. Connect your GitHub repository to Vercel
+
+4. Set the following environment variables in Vercel:
+   - `REACT_APP_SUPABASE_URL`: Your Supabase project URL
+   - `REACT_APP_SUPABASE_ANON_KEY`: Your Supabase anon key
+   - `REACT_APP_USE_MOCK_API`: Set to "false" for production
+
+5. Deploy your application
+
+The included `vercel.json` configuration file will handle the build process and optimizations automatically.
+
+## 🔄 Alternative Backend Options
+
+### Firebase
+
+To use Firebase instead of Supabase:
+
+1. Create a Firebase project and set up Firestore
+
+2. Update the service layer in `src/services/api.ts` to use Firebase SDK
+
+```typescript
+// Example Firebase implementation (you'll need to adapt the existing functions)
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, doc, ... } from 'firebase/firestore';
+
+// Your Firebase configuration
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  // ... other firebase config
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Update service methods to use Firestore instead of Supabase
+// ...
+```
+
+## 🧬 Scaling Considerations
+
+This application is designed to handle 1000+ concurrent users with the following considerations:
+
+### Performance Optimizations
+
+- **Data Caching**: Implemented in frontend to reduce API calls
+- **Optimistic UI Updates**: Instant feedback for user actions, with background syncing
+- **Lazy Loading**: Components and routes load only when needed
+- **Asset Optimization**: Compressed images and efficient bundle splitting
+
+### Supabase Scaling
+
+- **Database Performance**: Use indexes for common queries
+- **Realtime Events**: Optimized Supabase realtime subscriptions 
+- **Edge Functions**: For complex backend logic that should run close to users
+
+### Vercel Scaling
+
+Vercel automatically scales to handle traffic spikes with:
+- Global CDN for static assets
+- Edge network for API routes
+- Automatic handling of concurrent users
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
+## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
