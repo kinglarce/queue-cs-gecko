@@ -53,9 +53,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     volumes:
       - pg_data:/var/lib/postgresql/data
@@ -78,18 +78,18 @@ services:
       - "8000:8000"   # REST API
       - "9000:9000"   # Dashboard
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: postgres
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      SUPABASE_URL: http://localhost:8000
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_PORT: 8000
       SUPABASE_REST_PORT: 8000
       KONG_PORT: 8000
       STUDIO_PORT: 9000
-      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRldi1hbm9uLWtleSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ1MzAwMDU3LCJleHAiOjIwNjA2NjAwNTd9.BybjDwvnqWthSplBnvDhmQSVjqZ2sgYSUNa1FPMRE-M
-      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRldi1zZXJ2aWNlLWtleSIsInJvbGUiOiJzZXJ2aWNlX3JvbGUiLCJpYXQiOjE3NDUzMDAwNTcsImV4cCI6MjA2MDY2MDA1N30.aT7qQemRT0STB8Tebp6j1BzxQOuYflJr0mLCDRjzIqw
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       JWT_SECRET: ${JWT_SECRET}
       PGRST_JWT_SECRET: ${JWT_SECRET}
     healthcheck:
@@ -106,7 +106,10 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf.d/default.conf.template:/etc/nginx/templates/default.conf.template
+    environment:
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
     depends_on:
       - frontend
       - supabase

@@ -29,6 +29,23 @@ A modern digital queue management system designed to streamline customer service
 - [Docker](https://www.docker.com/get-started) and Docker Compose
 - Node.js (v16+) and npm/yarn (for local development without Docker)
 
+### Environment Setup (IMPORTANT)
+
+Before starting the application, you must set up your environment variables correctly:
+
+1. Create your own `.env` file from the template:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Generate secure JWT tokens for Supabase:
+   ```bash
+   cd frontend
+   npm run generate-jwt
+   ```
+
+3. Update your `.env` file with the generated tokens and your own secure values
+
 ### Quick Start with Docker (Recommended)
 
 The simplest way to get everything running:
@@ -58,25 +75,29 @@ This will:
 
 Then open http://localhost:3000 in your browser
 
-### Without Docker (Advanced)
+### Fixing Dependency Issues
 
-If you want to run components individually:
+If you encounter missing dependencies (zod, @hookform/resolvers, etc.):
 
-1. Set up PostgreSQL and run the SQL scripts from `supabase/migrations/`
+#### When using Docker:
 
-2. Start a local Supabase instance or use a cloud Supabase instance
+```bash
+# Get your container ID
+docker ps
 
-3. Configure the frontend to connect to your Supabase instance:
-   ```bash
-   cd frontend
-   # Configure environment variables
-   cp ../.env.example .env.local
-   # Edit .env.local with your Supabase URL and anon key
-   
-   # Start frontend
-   npm install
-   npm start
-   ```
+# Run the dependency installation script
+docker exec -it <container_id> /bin/sh -c "chmod +x /app/scripts/install-dependencies.sh && /app/scripts/install-dependencies.sh"
+
+# Restart the container
+docker-compose restart frontend
+```
+
+#### When running locally:
+
+```bash
+cd frontend
+./fix-dependencies.sh
+```
 
 ## 🔍 Troubleshooting
 
@@ -124,6 +145,15 @@ If the frontend can't connect to Supabase:
    ```
    curl http://localhost:8000/rest/v1/
    ```
+
+### Security Best Practices
+
+For security considerations, please refer to the [SECURITY.md](SECURITY.md) file which includes:
+
+- How to manage environment variables securely
+- Best practices for handling secrets
+- Securing Docker containers
+- Secure development workflow
 
 ## 📊 Production Deployment
 

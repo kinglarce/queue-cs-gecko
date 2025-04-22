@@ -7,19 +7,29 @@ RUN npm install -g create-react-app
 
 # Copy package.json and install dependencies
 COPY package.json package-lock.json* ./
-RUN npm install || echo "No package.json found, will initialize later"
+RUN npm install --legacy-peer-deps || echo "No package.json found, will initialize later"
+
+# Make sure required dependencies are installed
+RUN npm install --legacy-peer-deps --save @hookform/resolvers zod || echo "Already installed"
+
+# Copy the rest of the application
+COPY . .
+
+# Install missing dependencies if they don't exist
+RUN if [ ! -d "node_modules/@hookform/resolvers" ] || [ ! -d "node_modules/zod" ]; then \
+      echo "Installing missing form validation dependencies..."; \
+      npm install --legacy-peer-deps --save @hookform/resolvers zod; \
+    fi
 
 # Start command if node_modules doesn't exist
 CMD if [ ! -d "node_modules" ]; then \
       echo "No node_modules found, initializing React app..."; \
       npx create-react-app . --template typescript; \
-      npm install; \
+      npm install --legacy-peer-deps; \
+      npm install --legacy-peer-deps --save @hookform/resolvers zod; \
       npx tailwindcss init; \
     fi && \
     npm start
-
-# Copy the rest of the application
-COPY . .
 
 # Use ARG to receive build-time environment variables
 ARG REACT_APP_SUPABASE_URL
