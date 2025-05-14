@@ -1,14 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY, LOCAL_STORAGE_KEYS } from '../config';
 import { ActiveSubscriptions } from '../types/models';
 
+// Get environment variables
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
+
+// Make sure we have the environment variables
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase URL or Anonymous Key. Please check your environment variables.');
+}
+
 // Create Supabase client
-export const supabase: any = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: false,
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
   },
   realtime: {
     eventsPerSecond: 10
+  },
+  global: {
+    headers: {
+      'x-client-info': 'queue-cs-gecko'
+    }
   }
 });
 
@@ -22,7 +37,7 @@ export const activeSubscriptions: ActiveSubscriptions = {};
 export const setAdminToken = (token: string): void => {
   try {
     // Store token
-    localStorage.setItem(LOCAL_STORAGE_KEYS.ADMIN_TOKEN, token);
+    localStorage.setItem('adminToken', token);
     
     // Set token as header for RLS policies
     supabase.headers = {
@@ -41,7 +56,7 @@ export const setAdminToken = (token: string): void => {
 export const setVisitorToken = (token: string): void => {
   try {
     // Store token
-    localStorage.setItem(LOCAL_STORAGE_KEYS.VISITOR_TOKEN, token);
+    localStorage.setItem('visitorToken', token);
     
     // Set token as header for RLS policies
     supabase.headers = {
@@ -59,7 +74,7 @@ export const setVisitorToken = (token: string): void => {
 export const clearAdminToken = (): void => {
   try {
     // Remove token from storage
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.ADMIN_TOKEN);
+    localStorage.removeItem('adminToken');
     
     // Remove token from headers
     if (supabase.headers && supabase.headers['x-admin-token']) {
@@ -78,7 +93,7 @@ export const clearAdminToken = (): void => {
 export const clearVisitorToken = (): void => {
   try {
     // Remove token from storage
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.VISITOR_TOKEN);
+    localStorage.removeItem('visitorToken');
     
     // Remove token from headers
     if (supabase.headers && supabase.headers['x-visitor-token']) {

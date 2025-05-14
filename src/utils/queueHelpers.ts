@@ -31,30 +31,40 @@ export const createQueueRoom = async (
     const adminToken = generateToken();
     const visitorToken = generateToken();
     
+    const name = typeof nameOrData === 'string' ? nameOrData : nameOrData.name;
+    const desc = typeof nameOrData === 'string' ? description || null : nameOrData.description || null;
+    
     // Create new queue room in database
     const { data: roomData, error } = await supabase
       .from('queue_rooms')
       .insert({
-        name: typeof nameOrData === 'string' ? nameOrData : nameOrData.name,
-        description: typeof nameOrData === 'string' ? description || null : nameOrData.description || null,
-        status: 'open',
+        name: name,
+        description: desc,
+        status: 'active',
         admin_token: adminToken,
         visitor_token: visitorToken
       })
       .select()
       .single();
     
-    if (error) throw error;
-    if (!roomData) throw new Error('Failed to create queue room');
+    if (error) {
+      console.error('Supabase insert error:', error);
+      throw new Error(`Failed to create queue: ${error.message}`);
+    }
     
-    const room = roomData as QueueRoom;
+    if (!roomData) throw new Error('Failed to create queue room: No data returned');
     
     // Generate URLs for admin and visitor access
-    const adminUrl = `${BASE_URL}/admin/${room.id}?token=${adminToken}`;
-    const visitorUrl = `${BASE_URL}/queue/${room.id}?token=${visitorToken}`;
+    const baseUrl = window.location.origin;
+    const adminUrl = `${baseUrl}/admin/${roomData.id}?token=${adminToken}`;
+    const visitorUrl = `${baseUrl}/join/${roomData.id}?token=${visitorToken}`;
     
-    return { room, adminUrl, visitorUrl };
-  } catch (error) {
+    return { 
+      ...roomData,
+      adminUrl, 
+      visitorUrl 
+    };
+  } catch (error: any) {
     console.error('Error creating queue room:', error);
     throw error;
   }
