@@ -21,7 +21,7 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/create" element={<CreateQueue />} />
             <Route path="/admin/:roomId" element={<AdminView />} />
-            <Route path="/join/:roomId" element={<VisitorView />} />
+            <Route path="/queue/:roomId" element={<VisitorView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Container>
