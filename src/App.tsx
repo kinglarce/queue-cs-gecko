@@ -11,6 +11,12 @@ const App: React.FC = () => {
   useEffect(() => {
     // Set page title from environment variable
     document.title = process.env.REACT_APP_TITLE || 'HYROX Customer Support';
+    
+    // Log environment for debugging
+    console.log('Environment check:', {
+      supabaseUrl: process.env.REACT_APP_SUPABASE_URL ? 'Set' : 'Not set',
+      baseUrl: process.env.REACT_APP_BASE_URL || window.location.origin
+    });
   }, []);
 
   return (
@@ -21,7 +27,8 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/create" element={<CreateQueue />} />
             <Route path="/admin/:roomId" element={<AdminView />} />
-            <Route path="/queue/:roomId" element={<VisitorView />} />
+            <Route path="/join/:roomId" element={<VisitorView />} />
+            <Route path="/queue/:roomId" element={<VisitorView />} /> {/* Fallback for compatibility */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Container>

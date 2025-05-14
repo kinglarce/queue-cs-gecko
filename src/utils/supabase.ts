@@ -44,6 +44,8 @@ export const setAdminToken = (token: string): void => {
       ...supabase.headers,
       'x-admin-token': token
     };
+    
+    console.log('Admin token set successfully:', token.substring(0, 5) + '...');
   } catch (error) {
     console.error('Error setting admin token:', error);
   }
@@ -63,6 +65,8 @@ export const setVisitorToken = (token: string): void => {
       ...supabase.headers,
       'x-visitor-token': token
     };
+    
+    console.log('Visitor token set successfully:', token.substring(0, 5) + '...');
   } catch (error) {
     console.error('Error setting visitor token:', error);
   }
@@ -78,10 +82,12 @@ export const clearAdminToken = (): void => {
     
     // Remove token from headers
     if (supabase.headers && supabase.headers['x-admin-token']) {
-      // Create new headers object without the admin token
-      const { 'x-admin-token': _, ...restHeaders } = supabase.headers;
-      supabase.headers = restHeaders;
+      const newHeaders = { ...supabase.headers };
+      delete newHeaders['x-admin-token'];
+      supabase.headers = newHeaders;
     }
+    
+    console.log('Admin token cleared successfully');
   } catch (error) {
     console.error('Error clearing admin token:', error);
   }
@@ -97,10 +103,12 @@ export const clearVisitorToken = (): void => {
     
     // Remove token from headers
     if (supabase.headers && supabase.headers['x-visitor-token']) {
-      // Create new headers object without the visitor token
-      const { 'x-visitor-token': _, ...restHeaders } = supabase.headers;
-      supabase.headers = restHeaders;
+      const newHeaders = { ...supabase.headers };
+      delete newHeaders['x-visitor-token'];
+      supabase.headers = newHeaders;
     }
+    
+    console.log('Visitor token cleared successfully');
   } catch (error) {
     console.error('Error clearing visitor token:', error);
   }
