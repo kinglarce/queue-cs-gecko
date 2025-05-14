@@ -19,10 +19,14 @@ export const generateToken = (): string => {
 
 /**
  * Create a new queue room
- * @param data Queue room data including name and optional description
+ * @param nameOrData Queue room name or data object with name and description
+ * @param description Queue room description (optional if first parameter is an object)
  * @returns The created room data with admin and visitor URLs
  */
-export const createQueueRoom = async (data: CreateQueueFormData): Promise<QueueRoomResponse> => {
+export const createQueueRoom = async (
+  nameOrData: string | CreateQueueFormData, 
+  description?: string
+): Promise<QueueRoomResponse> => {
   try {
     const adminToken = generateToken();
     const visitorToken = generateToken();
@@ -31,8 +35,8 @@ export const createQueueRoom = async (data: CreateQueueFormData): Promise<QueueR
     const { data: roomData, error } = await supabase
       .from('queue_rooms')
       .insert({
-        name: data.name,
-        description: data.description || null,
+        name: typeof nameOrData === 'string' ? nameOrData : nameOrData.name,
+        description: typeof nameOrData === 'string' ? description || null : nameOrData.description || null,
         status: 'open',
         admin_token: adminToken,
         visitor_token: visitorToken

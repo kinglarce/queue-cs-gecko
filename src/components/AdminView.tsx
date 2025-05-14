@@ -29,7 +29,8 @@ import { supabase, setAdminToken, activeSubscriptions } from '../utils/supabase'
 import QueueItem from './QueueItem';
 import { QueueRoom, QueueItem as QueueItemType, QueueItemStatus } from '../types/models';
 
-interface RouteParams {
+// Updated RouteParams to satisfy React Router v6 constraints
+type RouteParams = {
   roomId: string;
 }
 
@@ -95,17 +96,17 @@ const AdminView: React.FC = () => {
         schema: 'public',
         table: 'queue_items',
         filter: `queue_room_id=eq.${roomId}`
-      }, payload => {
-        setItems(current => [...current, payload.new as QueueItemType]);
+      }, (payload: { new: QueueItemType }) => {
+        setItems((current: QueueItemType[]) => [...current, payload.new]);
       })
       .on('postgres_changes', {
         event: 'UPDATE',
         schema: 'public',
         table: 'queue_items',
         filter: `queue_room_id=eq.${roomId}`
-      }, payload => {
-        setItems(current => 
-          current.map(item => item.id === payload.new.id ? (payload.new as QueueItemType) : item)
+      }, (payload: { new: QueueItemType }) => {
+        setItems((current: QueueItemType[]) => 
+          current.map((item: QueueItemType) => item.id === payload.new.id ? payload.new : item)
         );
       })
       .on('postgres_changes', {
@@ -113,9 +114,9 @@ const AdminView: React.FC = () => {
         schema: 'public',
         table: 'queue_items',
         filter: `queue_room_id=eq.${roomId}`
-      }, payload => {
-        setItems(current => 
-          current.filter(item => item.id !== payload.old.id)
+      }, (payload: { old: { id: string } }) => {
+        setItems((current: QueueItemType[]) => 
+          current.filter((item: QueueItemType) => item.id !== payload.old.id)
         );
       });
     

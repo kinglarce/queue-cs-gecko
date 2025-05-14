@@ -23,7 +23,8 @@ import { getQueueRoom, getQueueItems, joinQueue, getQueuePosition } from '../uti
 import { supabase, setVisitorToken, activeSubscriptions } from '../utils/supabase';
 import { QueueRoom, QueueItem, JoinQueueFormData } from '../types/models';
 
-interface RouteParams {
+// Updated RouteParams to satisfy React Router v6 constraints
+type RouteParams = {
   roomId: string;
 }
 
@@ -95,7 +96,7 @@ const VisitorView: React.FC = () => {
         if (queueItem) {
           // If user has joined, update their position
           try {
-            const newPosition = await getQueuePosition(roomId, queueItem.ticket_number);
+            const newPosition = await getQueuePosition(roomId as string, queueItem.ticket_number);
             setPosition(newPosition);
           } catch (err) {
             console.error('Error getting position:', err);

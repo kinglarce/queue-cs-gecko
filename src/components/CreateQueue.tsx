@@ -31,12 +31,12 @@ const CreateQueue: React.FC = () => {
     visitor: false
   });
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     
     if (!formData.name.trim()) {
@@ -48,7 +48,7 @@ const CreateQueue: React.FC = () => {
     setError(null);
     
     try {
-      const queueData = await createQueueRoom(formData.name, formData.description);
+      const queueData = await createQueueRoom(formData.name, formData.description || '');
       setNewQueue(queueData);
     } catch (err: any) {
       setError(err.message || 'Failed to create queue');
@@ -58,7 +58,7 @@ const CreateQueue: React.FC = () => {
     }
   };
   
-  const handleCopy = (text: string, type: 'admin' | 'visitor') => {
+  const handleCopy = (text: string, type: 'admin' | 'visitor'): void => {
     navigator.clipboard.writeText(text).then(() => {
       setCopySuccess({ ...copySuccess, [type]: true });
       setTimeout(() => {
