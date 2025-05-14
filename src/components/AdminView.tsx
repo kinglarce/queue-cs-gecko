@@ -121,7 +121,7 @@ const AdminView: React.FC = () => {
       });
     
     // Subscribe to the channel
-    channel.subscribe((status) => {
+    channel.subscribe((status: string) => {
       if (status !== 'SUBSCRIBED') {
         console.error('Failed to subscribe to real-time updates');
       }
@@ -198,9 +198,9 @@ const AdminView: React.FC = () => {
   }
   
   // Filter items by status
-  const waitingItems = items.filter(item => item.status === 'waiting');
-  const servingItems = items.filter(item => item.status === 'serving');
-  const completedItems = items.filter(item => 
+  const waitingItems = items.filter((item: QueueItemType) => item.status === 'waiting');
+  const servingItems = items.filter((item: QueueItemType) => item.status === 'serving');
+  const completedItems = items.filter((item: QueueItemType) => 
     item.status === 'completed' || item.status === 'no_show'
   );
   
@@ -235,7 +235,7 @@ const AdminView: React.FC = () => {
               value={visitorUrl}
               InputProps={{ readOnly: true }}
               size="small"
-              onClick={(e) => (e.target as HTMLInputElement).select()}
+              onClick={(e: React.MouseEvent<HTMLInputElement>) => (e.target as HTMLInputElement).select()}
               sx={{ mr: 1 }}
             />
             <IconButton 
@@ -311,7 +311,7 @@ const AdminView: React.FC = () => {
                   No one is waiting in the queue
                 </Typography>
               ) : (
-                waitingItems.map(item => (
+                waitingItems.map((item: QueueItemType) => (
                   <QueueItem
                     key={item.id}
                     item={item}
@@ -330,7 +330,7 @@ const AdminView: React.FC = () => {
                   No one is being served
                 </Typography>
               ) : (
-                servingItems.map(item => (
+                servingItems.map((item: QueueItemType) => (
                   <QueueItem
                     key={item.id}
                     item={item}
@@ -349,7 +349,7 @@ const AdminView: React.FC = () => {
                   No completed visits
                 </Typography>
               ) : (
-                completedItems.map(item => (
+                completedItems.map((item: QueueItemType) => (
                   <QueueItem
                     key={item.id}
                     item={item}

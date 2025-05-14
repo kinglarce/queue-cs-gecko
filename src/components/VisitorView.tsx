@@ -120,7 +120,7 @@ const VisitorView: React.FC = () => {
       });
       
     // Subscribe to the channel
-    channel.subscribe((status) => {
+    channel.subscribe((status: string) => {
       if (status !== 'SUBSCRIBED') {
         console.error('Failed to subscribe to real-time updates');
       }

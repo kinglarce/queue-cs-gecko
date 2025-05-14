@@ -1,17 +1,28 @@
 {
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build",
+        "buildCommand": "npm run build"
+      }
+    }
+  ],
   "routes": [
-    { "src": "/static/(.*)", "dest": "/static/$1" },
-    { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/manifest.json", "dest": "/manifest.json" },
-    { "src": "/robots.txt", "dest": "/robots.txt" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
   ],
   "env": {
     "REACT_APP_TITLE": "HYROX Customer Support Queue"
   },
   "build": {
     "env": {
-      "REACT_APP_TITLE": "HYROX Customer Support Queue"
+      "REACT_APP_TITLE": "HYROX Customer Support Queue",
+      "CI": "false",
+      "DISABLE_ESLINT_PLUGIN": "true",
+      "TSC_COMPILE_ON_ERROR": "true",
+      "DISABLE_NEW_JSX_TRANSFORM": "false"
     }
   },
   "github": {
