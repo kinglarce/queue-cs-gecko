@@ -1,250 +1,196 @@
-# Queue CS Gecko System 🦎
+# HYROX Customer Support Queue System
 
-A modern digital queue management system designed to streamline customer service operations. This application allows organizations to create digital queues, manage customer flow, and provide real-time updates to visitors.
+A modern, real-time queue management system built for HYROX customer support desks. This application allows support staff to efficiently manage customer queues and provide better service with reduced wait times.
 
-## 🚀 Features
+## Features
 
-- **Digital Queue Management**: Create and manage multiple queues
-- **Real-time Updates**: Customers receive instant updates about their position
-- **QR Code Integration**: Easy queue joining via QR code scanning
-- **Admin Dashboard**: Manage queues, call next customers, and view statistics
-- **Estimated Wait Times**: Automatically calculate and display wait times
-- **Responsive Design**: Works on all devices, from mobile to large displays
+- **Real-time queue updates**: Changes to the queue are instantly reflected for both admins and visitors
+- **Simple queue creation**: Support staff can quickly create queues for different support areas
+- **Visitor-friendly interface**: Clear wait time information and queue position for visitors
+- **Admin dashboard**: Manage customers, track wait times, and mark requests as completed
+- **QR code sharing**: Easily share visitor access links via QR codes
+- **Mobile-responsive**: Works well on mobile devices for both visitors and admins
 
-## 🛠️ Technology Stack
+## Tech Stack
 
-- **Frontend**: React, TypeScript, Tailwind CSS
-- **State Management**: React Hooks, Context API
-- **Backend Options**:
-  - **Production**: Supabase (PostgreSQL + APIs)
-  - **Development**: JSON Server (mock API)
-- **Deployment**:
-  - **Frontend**: Vercel
-  - **Backend**: Supabase Cloud
+- **Frontend**: React with TypeScript, Material UI
+- **Backend**: Supabase (PostgreSQL database with real-time subscriptions)
+- **Hosting**: Vercel
+- **Authentication**: Token-based access control
 
-## 🔧 Development Setup
+## Local Development Setup
 
-### Prerequisites
-
-- [Docker](https://www.docker.com/get-started) and Docker Compose
-- Node.js (v16+) and npm/yarn (for local development without Docker)
-
-### Environment Setup (IMPORTANT)
-
-Before starting the application, you must set up your environment variables correctly:
-
-1. Create your own `.env` file from the template:
-   ```bash
-   cp .env.example .env
+1. Clone the repository:
+   ```
+   git clone https://github.com/your-username/hyrox-queue-system.git
+   cd hyrox-queue-system
    ```
 
-2. Generate secure JWT tokens for Supabase:
-   ```bash
-   cd frontend
-   npm run generate-jwt
+2. Install dependencies:
+   ```
+   npm install
    ```
 
-3. Update your `.env` file with the generated tokens and your own secure values
-
-### Quick Start with Docker (Recommended)
-
-The simplest way to get everything running:
-
-#### On Windows:
-
-```bash
-# Run the startup script
-start.bat
-```
-
-#### On macOS/Linux:
-
-```bash
-# Make script executable
-chmod +x start.sh
-
-# Run the startup script
-./start.sh
-```
-
-This will:
-1. Start PostgreSQL database
-2. Start Supabase API
-3. Start the frontend application
-4. Configure nginx for routing
-
-Then open http://localhost:3000 in your browser
-
-### Fixing Dependency Issues
-
-If you encounter missing dependencies (zod, @hookform/resolvers, etc.):
-
-#### When using Docker:
-
-```bash
-# Get your container ID
-docker ps
-
-# Run the dependency installation script
-docker exec -it <container_id> /bin/sh -c "chmod +x /app/scripts/install-dependencies.sh && /app/scripts/install-dependencies.sh"
-
-# Restart the container
-docker-compose restart frontend
-```
-
-#### When running locally:
-
-```bash
-cd frontend
-./fix-dependencies.sh
-```
-
-## 🔍 Troubleshooting
-
-### Database Connection Errors
-
-If you see database connection errors in Supabase logs:
-
-1. Ensure PostgreSQL is running and healthy:
-   ```bash
-   docker-compose ps
+3. Create a `.env.local` file with your Supabase credentials:
+   ```
+   REACT_APP_SUPABASE_URL=your_supabase_project_url
+   REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+   REACT_APP_TITLE=HYROX Customer Support
+   REACT_APP_BASE_URL=http://localhost:3000
    ```
 
-2. Check PostgreSQL logs:
-   ```bash
-   docker-compose logs postgres
+4. Start the development server:
+   ```
+   npm start
    ```
 
-3. Verify the migrations were applied:
-   ```bash
-   docker-compose exec postgres psql -U postgres -c "SELECT * FROM pg_tables WHERE schemaname='public'"
+## Deployment to Vercel and Supabase
+
+### 1. Supabase Database Setup
+
+1. Create a new Supabase project at [https://supabase.com](https://supabase.com)
+
+2. Run the following SQL setup script in the Supabase SQL Editor:
+   ```sql
+   -- Create tables
+   CREATE TABLE queue_rooms (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     name TEXT NOT NULL,
+     description TEXT,
+     status TEXT NOT NULL DEFAULT 'open',
+     admin_token TEXT NOT NULL UNIQUE,
+     visitor_token TEXT NOT NULL UNIQUE,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
+
+   CREATE TABLE queue_items (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     queue_room_id UUID NOT NULL REFERENCES queue_rooms(id) ON DELETE CASCADE,
+     name TEXT NOT NULL,
+     ticket_number INTEGER NOT NULL,
+     status TEXT NOT NULL DEFAULT 'waiting',
+     joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     serving_at TIMESTAMP WITH TIME ZONE,
+     completed_at TIMESTAMP WITH TIME ZONE,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     UNIQUE (queue_room_id, ticket_number)
+   );
+
+   -- Create RLS policies
+   -- Enable Row Level Security
+   ALTER TABLE queue_rooms ENABLE ROW LEVEL SECURITY;
+   ALTER TABLE queue_items ENABLE ROW LEVEL SECURITY;
+
+   -- Create policy for admin access
+   CREATE POLICY "Admin Access" ON queue_rooms
+     FOR ALL
+     TO authenticated, anon
+     USING (admin_token = current_setting('request.headers', true)::json->>'x-admin-token');
+
+   -- Create policy for visitor access to rooms
+   CREATE POLICY "Visitor Access" ON queue_rooms
+     FOR SELECT 
+     TO authenticated, anon
+     USING (visitor_token = current_setting('request.headers', true)::json->>'x-visitor-token');
+
+   -- Create policy for visitor access to queue items
+   CREATE POLICY "Visitor Access Items" ON queue_items
+     FOR SELECT
+     TO authenticated, anon
+     USING (
+       queue_room_id IN (
+         SELECT id FROM queue_rooms 
+         WHERE visitor_token = current_setting('request.headers', true)::json->>'x-visitor-token'
+       )
+     );
+
+   -- Create policy for admin access to queue items
+   CREATE POLICY "Admin Access Items" ON queue_items
+     FOR ALL
+     TO authenticated, anon
+     USING (
+       queue_room_id IN (
+         SELECT id FROM queue_rooms 
+         WHERE admin_token = current_setting('request.headers', true)::json->>'x-admin-token'
+       )
+     );
+
+   -- Function to get next ticket number
+   CREATE OR REPLACE FUNCTION next_ticket_number(queue_room_id UUID)
+   RETURNS INTEGER AS $$
+   DECLARE
+     max_ticket INTEGER;
+   BEGIN
+     SELECT COALESCE(MAX(ticket_number), 0) INTO max_ticket
+     FROM queue_items
+     WHERE queue_items.queue_room_id = $1;
+     
+     RETURN max_ticket + 1;
+   END;
+   $$ LANGUAGE plpgsql SECURITY DEFINER;
    ```
 
-4. Restart Supabase:
-   ```bash
-   docker-compose restart supabase
+3. In Supabase, enable Row Level Security for both tables and verify the policies are active
+
+4. Enable real-time replication for the `queue_rooms` and `queue_items` tables:
+   - Go to Database → Replication
+   - Make sure both tables are included in the publication
+
+### 2. Vercel Deployment
+
+1. Fork or push your repository to GitHub/GitLab/Bitbucket
+
+2. Create a new project on [Vercel](https://vercel.com)
+
+3. Link your repository and configure the following environment variables:
+   ```
+   REACT_APP_SUPABASE_URL=your_supabase_project_url
+   REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+   REACT_APP_TITLE=HYROX Customer Support
+   REACT_APP_BASE_URL=your_vercel_project_url
    ```
 
-### Frontend Connection Issues
+4. Deploy the application with the following settings:
+   - Framework Preset: Create React App
+   - Build Command: `npm run build`
+   - Output Directory: `build`
+   - Install Command: `npm install`
 
-If the frontend can't connect to Supabase:
+5. After deployment, your application will be available at the Vercel URL
 
-1. Check browser console for errors
+## Usage Instructions
 
-2. Verify nginx configuration:
-   ```bash
-   docker-compose exec nginx nginx -t
-   ```
+### Creating a New Queue
 
-3. Check nginx logs:
-   ```bash
-   docker-compose logs nginx
-   ```
+1. Visit the homepage of the application
+2. Click "Create a Queue"
+3. Enter a name and optional description
+4. Click "Create Queue"
+5. You'll be given a unique admin link and visitor link
+   - Admin Link: For support staff to manage the queue
+   - Visitor Link: For customers to join the queue (can be shared via QR code)
 
-4. Try directly accessing Supabase API:
-   ```
-   curl http://localhost:8000/rest/v1/
-   ```
+### Administrator View
 
-### Security Best Practices
+1. Access the queue using the admin link
+2. You'll see all individuals in your queue sorted by wait time
+3. When ready to serve the next person, click "Serve"
+4. When finished with a customer, mark them as "Complete" or "No Show"
+5. View statistics on the queue to track service performance
 
-For security considerations, please refer to the [SECURITY.md](SECURITY.md) file which includes:
+### Visitor View
 
-- How to manage environment variables securely
-- Best practices for handling secrets
-- Securing Docker containers
-- Secure development workflow
+1. Access the queue using the visitor link
+2. Enter your name to join the queue
+3. Receive your position in line and estimated wait time
+4. When it's your turn, you'll be notified on-screen
 
-## 📊 Production Deployment
-
-### Setting up Supabase (Backend)
-
-1. Create a Supabase project at [supabase.com](https://supabase.com)
-
-2. Run the SQL scripts from `supabase/migrations` to set up your database schema
-
-3. Enable Row-Level Security (RLS) and set up appropriate policies
-
-4. Note your Supabase URL and anon key for frontend deployment
-
-### Deploying to Vercel (Frontend)
-
-1. Fork or clone this repository to your GitHub account
-
-2. Sign up for [Vercel](https://vercel.com) and create a new project
-
-3. Connect your GitHub repository to Vercel
-
-4. Set the following environment variables in Vercel:
-   - `REACT_APP_SUPABASE_URL`: Your Supabase project URL
-   - `REACT_APP_SUPABASE_ANON_KEY`: Your Supabase anon key
-   - `REACT_APP_USE_MOCK_API`: Set to "false" for production
-
-5. Deploy your application
-
-The included `vercel.json` configuration file will handle the build process and optimizations automatically.
-
-## 🔄 Alternative Backend Options
-
-### Firebase
-
-To use Firebase instead of Supabase:
-
-1. Create a Firebase project and set up Firestore
-
-2. Update the service layer in `src/services/api.ts` to use Firebase SDK
-
-```typescript
-// Example Firebase implementation (you'll need to adapt the existing functions)
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, ... } from 'firebase/firestore';
-
-// Your Firebase configuration
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  // ... other firebase config
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Update service methods to use Firestore instead of Supabase
-// ...
-```
-
-## 🧬 Scaling Considerations
-
-This application is designed to handle 1000+ concurrent users with the following considerations:
-
-### Performance Optimizations
-
-- **Data Caching**: Implemented in frontend to reduce API calls
-- **Optimistic UI Updates**: Instant feedback for user actions, with background syncing
-- **Lazy Loading**: Components and routes load only when needed
-- **Asset Optimization**: Compressed images and efficient bundle splitting
-
-### Supabase Scaling
-
-- **Database Performance**: Use indexes for common queries
-- **Realtime Events**: Optimized Supabase realtime subscriptions 
-- **Edge Functions**: For complex backend logic that should run close to users
-
-### Vercel Scaling
-
-Vercel automatically scales to handle traffic spikes with:
-- Global CDN for static assets
-- Edge network for API routes
-- Automatic handling of concurrent users
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
----
+## Support
 
-Built with ❤️ by CS Gecko Team 
+For support or questions, please contact [your-email@example.com]
