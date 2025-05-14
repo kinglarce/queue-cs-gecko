@@ -1,7 +1,7 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Disallow: /admin/
-Disallow: /join/
+Disallow: /queue/
 Allow: /$
 Allow: /static/
 Sitemap: https://your-production-domain.com/sitemap.xml 

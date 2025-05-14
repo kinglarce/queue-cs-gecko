@@ -1,6 +1,6 @@
 {
-  "short_name": "HYROX Support",
-  "name": "HYROX Customer Support Queue System",
+  "short_name": "Queue System",
+  "name": "Customer Support Queue System",
   "icons": [
     {
       "src": "favicon.ico",
@@ -22,5 +22,5 @@
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff",
-  "description": "Queue management system for HYROX customer support"
+  "description": "Queue management system for customer support"
 } 
