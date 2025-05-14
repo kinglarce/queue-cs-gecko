@@ -1,6 +1,6 @@
-# HYROX Customer Support Queue System
+# Customer Support Queue System 🦎
 
-A modern, real-time queue management system built for HYROX customer support desks. This application allows support staff to efficiently manage customer queues and provide better service with reduced wait times.
+A modern, real-time queue management system built for customer support desks. This application allows support staff to efficiently manage customer queues and provide better service with reduced wait times.
 
 ## Features
 
@@ -22,8 +22,8 @@ A modern, real-time queue management system built for HYROX customer support des
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/hyrox-queue-system.git
-   cd hyrox-queue-system
+   git clone https://github.com/your-username/queue-cs-gecko.git
+   cd queue-cs-gecko
    ```
 
 2. Install dependencies:
@@ -35,7 +35,7 @@ A modern, real-time queue management system built for HYROX customer support des
    ```
    REACT_APP_SUPABASE_URL=your_supabase_project_url
    REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
-   REACT_APP_TITLE=HYROX Customer Support
+   REACT_APP_TITLE=Queue Customer Support
    REACT_APP_BASE_URL=http://localhost:3000
    ```
 
@@ -148,7 +148,7 @@ A modern, real-time queue management system built for HYROX customer support des
    ```
    REACT_APP_SUPABASE_URL=your_supabase_project_url
    REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
-   REACT_APP_TITLE=HYROX Customer Support
+   REACT_APP_TITLE=Queue Customer Support
    REACT_APP_BASE_URL=your_vercel_project_url
    ```
 
